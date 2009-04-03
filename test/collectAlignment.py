@@ -24,7 +24,8 @@ process.load("Geometry.TrackerGeometryBuilder.trackerGeometry_cfi")
 
 process.load("TrackingTools.TrackRefitter.globalCosmicMuonTrajectories_cff")
 process.globalCosmicMuons.Tracks = cms.InputTag("ALCARECOMuAlGlobalCosmics:GlobalMuon")
-process.Path = cms.Path(process.globalCosmicMuons)
+process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
+process.Path = cms.Path(process.offlineBeamSpot*process.globalCosmicMuons)
 
 process.load("Alignment.CommonAlignmentProducer.AlignmentProducer_cff")
 process.looper.tjTkAssociationMapTag = cms.InputTag("globalCosmicMuons:Refitted")
@@ -50,11 +51,11 @@ process.looper.algoConfig = cms.PSet(
 process.looper.ParameterBuilder.Selector = cms.PSet(alignParams = cms.vstring("MuonDTChambers,110001"))
 
 process.looper.applyDbAlignment = cms.untracked.bool(True)
-# process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_noesprefer_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_noesprefer_cff")
 process.GlobalTag.globaltag = cms.string("CRAFT_ALL_V4::All")
 # del process.SiStripPedestalsFakeESSource
-del process.DTFakeVDriftESProducer
+#del process.DTFakeVDriftESProducer
 
 process.load("CondCore.DBCommon.CondDBSetup_cfi")
 process.muonAlignment = cms.ESSource("PoolDBESSource",

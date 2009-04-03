@@ -27,7 +27,8 @@ process.load("Geometry.TrackerGeometryBuilder.trackerGeometry_cfi")
 
 process.load("TrackingTools.TrackRefitter.globalCosmicMuonTrajectories_cff")
 process.globalCosmicMuons.Tracks = cms.InputTag("ALCARECOMuAlGlobalCosmics:GlobalMuon")
-process.Path = cms.Path(process.globalCosmicMuons)
+process.load("RecoVertex.BeamSpotProducer.BeamSpot_cfi")
+process.Path = cms.Path(process.offlineBeamSpot*process.globalCosmicMuons)
 
 process.load("Alignment.CommonAlignmentProducer.AlignmentProducer_cff")
 process.looper.tjTkAssociationMapTag = cms.InputTag("globalCosmicMuons:Refitted")
