@@ -174,9 +174,6 @@ if not (options.all or options.map or options.segdiff or options.fit or options.
   print "\nOptions must include either -a or any of the following: --map, --segdiff, --fit, --median, --diagnostic. Exiting..."
   sys.exit()
 
-SINGLE_ITERATION = False
-if i1prefix == iNprefix: SINGLE_ITERATION = True
-
 DO_MAP = False
 DO_SEGDIFF = False
 DO_CURVATURE = False
@@ -354,17 +351,14 @@ def doMapPlotsDT(dt_basedir, tfiles_plotting):
       pdir = dt_basedir+'/'+wheel[0]+'/'+station[1]+'/'
       label = "DTvsphi_st%dwh%s" % (int(station[1]), wheelLetter(int(wheel[1])))
       htitle = "wheel %+d, station %s" % (int(wheel[1]), station[1])
-      mapplot(tfiles_plotting, label, "x", window=15., title=htitle, fitsawteeth=True,fitsine=True)
+      mapplot(tfiles_plotting, label, "x", window=15., title=htitle)
       c1.SaveAs(pdir+'map_DTvsphi_x.png')
-      #mapplot(tfiles_plotting, label, "dxdz", window=15., title=htitle, fitsawteeth=True,fitsine=True)
       mapplot(tfiles_plotting, label, "dxdz", window=15., title=htitle)
       c1.SaveAs(pdir+'map_DTvsphi_dxdz.png')
 
       if station[1]=='4': continue
-      #mapplot(tfiles_plotting, label, "y", window=15., title=htitle, fitsawteeth=True,fitsine=True)
       mapplot(tfiles_plotting, label, "y", window=15., title=htitle)
       c1.SaveAs(pdir+'map_DTvsphi_y.png')
-      #mapplot(tfiles_plotting, label, "dydz", window=15., title=htitle, fitsawteeth=True,fitsine=True)
       mapplot(tfiles_plotting, label, "dydz", window=15., title=htitle)
       c1.SaveAs(pdir+'map_DTvsphi_dydz.png')
 
@@ -389,8 +383,6 @@ def doMapPlotsDT(dt_basedir, tfiles_plotting):
         c1.SaveAs(pdir+'map_DTvsz_y.png')
         mapplot(tfiles_plotting, label, "dydz", window=15., title=htitle)
         c1.SaveAs(pdir+'map_DTvsz_dydz.png')
-  
-  saveTestResultsMap(options.runLabel)
 
 
 def doMapPlotsCSC(csc_basedir, tfiles_plotting):
@@ -426,12 +418,10 @@ def doMapPlotsCSC(csc_basedir, tfiles_plotting):
         pdir = csc_basedir+'/'+endcap[0]+'/'+station[1]+'/'+ring[1]+'/'
         label = "CSCvsphi_me%s%s%s" % (endcap[1], station[1], ring[1])
         htitle = "%s%s/%s" % (endcap[0], station[1],ring[1])
-        mapplot(tfiles_plotting, label, "x", window=15., title=htitle, fitsine=True)
+        mapplot(tfiles_plotting, label, "x", window=15., title=htitle)
         c1.SaveAs(pdir+'map_CSCvsphi_x.png')
         mapplot(tfiles_plotting, label, "dxdz", window=15., title=htitle)
         c1.SaveAs(pdir+'map_CSCvsphi_dxdz.png')
-
-  saveTestResultsMap(options.runLabel)
 
   qcount = 0
   for endcap in CSC_TYPES:
@@ -521,8 +511,6 @@ def doSegDiffPlotsDT(dt_basedir, tfiles_plotting, iter_reports):
   Interface: could be accessed by clicking on wheel number under the "wheel" column
   in a general DT map"""
 
-  if len(iter_reports)==0: return
-  
   for iwheel in DT_TYPES:
     if iwheel[1]=="ALL": continue
     pdir = dt_basedir + '/' + iwheel[0] + '/'
@@ -713,45 +701,24 @@ def createCanvasesList(fname="canvases_list.js"):
 #iteration3 = options.iN
 
 fname = options.inputDir+'/'+options.i1+'/'+i1prefix
-tfiles1_plotting = []
-iter1_tfile = None
-iter1_reports = []
-if not SINGLE_ITERATION:
-  if (DO_MAP or DO_SEGDIFF or DO_CURVATURE) and not os.access(fname+"_plotting.root",os.F_OK):
-    print "no file "+fname+"_plotting.root"
-    sys.exit()
-  if DO_FIT and not os.access(fname+".root",os.F_OK):
-    print "no file "+fname+".root"
-    sys.exit()
-  if DO_MEDIAN and not os.access(fname+"_report.py",os.F_OK):
-    print "no file "+fname+"_report.py"
-    sys.exit()
-  if DO_MAP or DO_SEGDIFF or DO_CURVATURE: tfiles1_plotting.append(ROOT.TFile(fname+"_plotting.root"))
-  if os.access(fname+".root",os.F_OK):
-    iter1_tfile = ROOT.TFile(fname+".root")
-  if os.access(fname+"_report.py",os.F_OK):
-    execfile(fname+"_report.py")
-    iter1_reports = reports
-
-fname = options.inputDir+'/'+options.iN+'/'+iNprefix
-tfilesN_plotting = []
-iterN_tfile = None
-iterN_reports = []
-if (DO_MAP or DO_SEGDIFF or DO_CURVATURE) and not os.access(fname+"_plotting.root",os.F_OK):
+if (DO_MAP or DO_SEGDIFF) and not os.access(fname+"_plotting.root",os.F_OK):
   print "no file "+fname+"_plotting.root"
   sys.exit()
-if DO_FIT and not os.access(fname+".root",os.F_OK):
-  print "no file "+fname+".root"
+tfiles1_plotting = []
+if (DO_MAP or DO_SEGDIFF): tfiles1_plotting.append(ROOT.TFile(fname+"_plotting.root"))
+iter1_tfile = ROOT.TFile(fname+".root")
+execfile(fname+"_report.py");
+iter1_reports = reports
+
+fname = options.inputDir+'/'+options.iN+'/'+iNprefix
+if (DO_MAP or DO_SEGDIFF) and not os.access(fname+"_plotting.root",os.F_OK):
+  print "no file "+fname+"_plotting.root"
   sys.exit()
-if DO_MEDIAN and not os.access(fname+"_report.py",os.F_OK):
-  print "no file "+fname+"_report.py"
-  sys.exit()
-if DO_MAP or DO_SEGDIFF or DO_CURVATURE: tfilesN_plotting.append(ROOT.TFile(fname+"_plotting.root"))
-if os.access(fname+".root",os.F_OK):
-  iterN_tfile = ROOT.TFile(fname+".root")
-if os.access(fname+"_report.py",os.F_OK):
-  execfile(fname+"_report.py")
-  iterN_reports = reports
+tfilesN_plotting = []
+if (DO_MAP or DO_SEGDIFF): tfilesN_plotting.append(ROOT.TFile(fname+"_plotting.root"))
+iterN_tfile = ROOT.TFile(fname+".root")
+execfile(fname+"_report.py");
+iterN_reports = reports
 
 ######################################################
 # setup output:
@@ -766,7 +733,7 @@ iterationN = "iterN"
 # create directory structure
 if options.createDirSructure:
   print "WARNING: all existing results in "+options.outputDir+" will be deleted!"
-  if not SINGLE_ITERATION: createDirectoryStructure(iteration1)
+  createDirectoryStructure(iteration1)
   createDirectoryStructure(iterationN)
   if not os.access(comdir,os.F_OK):
     os.mkdir(comdir)
@@ -778,10 +745,8 @@ c1 = ROOT.TCanvas("c1","c1",800,600)
 
 set_palette("blues")
 
-if not SINGLE_ITERATION: doIterationPlots(iteration1, tfiles1_plotting, iter1_tfile, iter1_reports)
+doIterationPlots(iteration1, tfiles1_plotting, iter1_tfile, iter1_reports)
 doIterationPlots(iterationN, tfilesN_plotting, iterN_tfile, iterN_reports)
-
-if CPP_LOADED: ROOT.cleanUpHeap()
 
 # write distributions of medians plots
 
@@ -791,6 +756,6 @@ if DO_MEDIAN:
 
 # perform diagnostic
 if DO_DIAGNOSTIC:
-  #if not SINGLE_ITERATION: doTests(iter1_reports,"mu_list_1.js","dqm_report_1.js",options.runLabel)
-  doTests(iterN_reports,"mu_list.js","dqm_report.js",options.runLabel)
+  doTests(reports,"mu_list.js","dqm_report.js",options.runLabel)
   createCanvasesList("canvases_list.js")
+
