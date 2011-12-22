@@ -13,7 +13,7 @@
 //
 // Original Author:  Jim Pivarski
 //         Created:  Wed Dec 12 13:31:55 CST 2007
-// $Id: CSCOverlapsTrackPreparation.cc,v 1.3 2009/03/27 09:20:48 flucke Exp $
+// $Id: CSCOverlapsTrackPreparation.cc,v 1.8 2011/03/22 09:49:50 innocent Exp $
 //
 //
 
@@ -120,7 +120,7 @@ CSCOverlapsTrackPreparation::produce(edm::Event& iEvent, const edm::EventSetup& 
   edm::ESHandle<GlobalTrackingGeometry> globalGeometry;
   iSetup.get<GlobalTrackingGeometryRecord>().get(globalGeometry);
 
-  TrajectoryStateTransform transformer;
+  
   MuonTransientTrackingRecHitBuilder muonTransBuilder;
 
   // Create a collection of Trajectories, to put in the Event
@@ -146,7 +146,7 @@ CSCOverlapsTrackPreparation::produce(edm::Event& iEvent, const edm::EventSetup& 
 	const Surface &layerSurface = cscGeometry->idToDet(id)->surface();
 	TrajectoryMeasurement::ConstRecHitPointer hitPtr(muonTransBuilder.build(&**hit, globalGeometry));
 
-	AlgebraicVector params(5);   // meaningless, CSCOverlapsAlignmentAlgorithm does the fit internally
+	AlgebraicVector5 params;   // meaningless, CSCOverlapsAlignmentAlgorithm does the fit internally
 	params[0] = 1.;  // straight-forward direction
 	params[1] = 0.;
 	params[2] = 0.;
@@ -167,8 +167,8 @@ CSCOverlapsTrackPreparation::produce(edm::Event& iEvent, const edm::EventSetup& 
 
     // build the trajectory
     if (clonedHits.size() > 0) {
-      PTrajectoryStateOnDet *PTraj = transformer.persistentState(*(TSOSes.begin()), clonedHits.begin()->geographicalId().rawId());
-      TrajectorySeed trajectorySeed(*PTraj, clonedHits, alongMomentum);
+      PTrajectoryStateOnDet const PTraj = trajectoryStateTransform::persistentState(*(TSOSes.begin()), clonedHits.begin()->geographicalId().rawId());
+      TrajectorySeed trajectorySeed(PTraj, clonedHits, alongMomentum);
       Trajectory trajectory(trajectorySeed, alongMomentum);
 
       edm::OwnVector<TrackingRecHit>::const_iterator clonedHit = clonedHits.begin();
